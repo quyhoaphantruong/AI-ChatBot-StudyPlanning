@@ -1,0 +1,37 @@
+# Node.js/React files
+node_modules/
+build/
+dist/
+.next/
+.vite/
+npm-debug.log
+yarn-error.log
+
+# Flask files
+venv/
+.env/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+
+# Docker related files
+.dockerignore
+.docker/
+docker-compose.override.yml
+
+# IDE/editor files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Sensitive environment files
+.env
+.env.local
+.env.production
+.env.development
