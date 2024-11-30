@@ -42,7 +42,6 @@ const StudyPlan = ({ userData, onReset }) => {
                 setAccumulatedText((prev) => prev + chunk);
               });
 
-              // Continue reading
               readChunk();
             }).catch(error => {
               console.error("Error reading stream:", error);

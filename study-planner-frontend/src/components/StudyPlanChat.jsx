@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Box, TextField, Button, Typography, LinearProgress } from "@mui/material";
-import { flushSync } from "react-dom";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm"; // GitHub Flavored Markdown for tables, task lists, etc.
+import remarkGfm from "remark-gfm"; 
 
 const StudyPlanChat = () => {
   const [messages, setMessages] = useState([]);
@@ -10,33 +9,30 @@ const StudyPlanChat = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [accumulatedText, setAccumulatedText] = useState("");
 
-  const messagesEndRef = useRef(null); // To scroll to the bottom of the chat
+  const messagesEndRef = useRef(null);
 
-  // Scroll to the bottom of the chat whenever a new message is added
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
     if (isGenerating) {
-      scrollToBottom(); // Ensure the chat scrolls to the latest message
+      scrollToBottom(); 
     } else {
-      // Scroll to bottom after a new message has been added
       scrollToBottom();
     }
   }, [messages, isGenerating]);
 
   const handleSendMessage = async () => {
-    if (!userInput.trim()) return; // Avoid sending empty messages
+    if (!userInput.trim()) return; 
 
     const newUserMessage = { role: "user", content: userInput };
     const newMessages = [...messages, newUserMessage];
 
-    // Add the new message to the chat
     setMessages(newMessages);
-    setUserInput(""); // Clear the input field
+    setUserInput("");
 
-    // Set the "bot is typing" indicator
+
     setIsGenerating(true);
 
     try {
@@ -61,7 +57,6 @@ const StudyPlanChat = () => {
           if (done) {
             console.log("Stream complete");
             setIsGenerating(false);
-            // After the stream is done, set the final message content
             setMessages((prevMessages) => [
               ...prevMessages,
               { role: "bot", content: partialData },
@@ -70,7 +65,7 @@ const StudyPlanChat = () => {
           }
 
           const chunk = decoder.decode(value, { stream: true });
-          partialData += chunk; // Accumulate chunk
+          partialData += chunk;
 
           // Continue reading
           readChunk();
@@ -113,13 +108,13 @@ const StudyPlanChat = () => {
       {/* Display messages */}
       <Box
         sx={{
-          flexGrow: 1, // This ensures the message box takes available space
-          overflowY: "auto", // Enable scrolling for the messages
+          flexGrow: 1,
+          overflowY: "auto",
           border: "1px solid #ccc",
           p: 2,
           mb: 2,
           display: "flex",
-          flexDirection: "column", // Messages will be stacked normally from top to bottom
+          flexDirection: "column",
         }}
       >
         {messages.map((message, index) => (
@@ -141,10 +136,10 @@ const StudyPlanChat = () => {
               }}
             >
               {message.role === "bot" ? (
-                // Use ReactMarkdown to render the bot's response as Markdown
+              
                 <ReactMarkdown
                   children={message.content}
-                  remarkPlugins={[remarkGfm]} // Enables GitHub Flavored Markdown (e.g., tables, task lists)
+                  remarkPlugins={[remarkGfm]}
                   components={{
                     h1: ({ node, ...props }) => <Typography variant="h4" {...props} />,
                     h2: ({ node, ...props }) => <Typography variant="h5" {...props} sx={{ mt: 4, mb: 2 }} />,
