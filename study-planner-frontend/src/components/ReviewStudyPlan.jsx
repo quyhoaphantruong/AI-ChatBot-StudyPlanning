@@ -3,9 +3,8 @@ import { Box, TextField, Button, Typography, LinearProgress } from "@mui/materia
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm"; 
 
-const StudyPlanChat = () => {
+const ReviewStudyPlan = () => {
   const [messages, setMessages] = useState([]);
-  const [userMessages, setUserMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -28,9 +27,7 @@ const StudyPlanChat = () => {
 
     const newUserMessage = { role: "user", content: userInput };
     const newMessages = [...messages, newUserMessage];
-    const newUserMessages = [...userMessages, newUserMessage];
 
-    setUserMessages(newUserMessages);
     setMessages(newMessages);
     setUserInput("");
 
@@ -38,12 +35,12 @@ const StudyPlanChat = () => {
     setIsGenerating(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/study-plan2", {
+      const response = await fetch("http://127.0.0.1:5000/review-study-plan", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: userMessages }),
+        body: JSON.stringify({ message: newMessages }),
       });
 
       if (!response.body) {
@@ -229,4 +226,4 @@ const StudyPlanChat = () => {
   );
 };
 
-export default StudyPlanChat;
+export default ReviewStudyPlan;
