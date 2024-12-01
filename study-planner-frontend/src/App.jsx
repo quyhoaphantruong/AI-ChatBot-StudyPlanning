@@ -1,19 +1,11 @@
-// App.js
-import { useState } from "react";
 import { CssBaseline, Box } from "@mui/material";
-import StudyPlanForm from "./components/StudyPlanForm";
-import StudyPlan from "./components/StudyPlan";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import StudyPlanChat from "./components/StudyPlanChat";
+import ReviewStudyPlan from "./components/ReviewStudyPlan";
 
 function App() {
-  const [userData, setUserData] = useState(null);
-
-  const handleFormSubmit = (data) => {
-    setUserData(data);
-  };
-
   return (
-    <>
+    <Router>
       <CssBaseline />
       <Box
         sx={{
@@ -26,14 +18,12 @@ function App() {
           py: 4,
         }}
       >
-        {!userData ? (
-          // <StudyPlanForm onSubmit={handleFormSubmit} />
-          <StudyPlanChat />
-        ) : (
-          <StudyPlan userData={userData} />
-        )}
+        <Routes>
+          <Route path="/" element={<StudyPlanChat />} />
+          <Route path="/review" element={<ReviewStudyPlan />} />
+        </Routes>
       </Box>
-    </>
+    </Router>
   );
 }
 

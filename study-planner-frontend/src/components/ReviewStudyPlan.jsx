@@ -3,7 +3,7 @@ import { Box, TextField, Button, Typography, LinearProgress } from "@mui/materia
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-const StudyPlanChat = () => {
+const ReviewStudyPlan = () => {
   const [messages, setMessages] = useState([]);
   const [userMessages, setUserMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
@@ -11,36 +11,28 @@ const StudyPlanChat = () => {
 
   const messagesEndRef = useRef(null);
 
-  // Scroll to the bottom of the chat whenever a new message is added
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    if (isGenerating) {
-      scrollToBottom(); // Ensure the chat scrolls to the latest message
-    } else {
-      // Scroll to bottom after a new message has been added
-      scrollToBottom();
-    }
-  }, [messages, isGenerating]);
+    scrollToBottom();
+  }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!userInput.trim()) return; // Avoid sending empty messages
+    if (!userInput.trim()) return;
 
+    // Add user's message to the chat
     const newUserMessage = { role: "user", content: userInput };
     const newUserMessages = [...userMessages, newUserMessage];
-    const newMessages = [...messages, newUserMessage];
-
+    
     setUserMessages(newUserMessages);
-    setMessages(newMessages);
-    setUserInput(""); // Clear the input field
-
-    // Set the "bot is typing" indicator
+    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
+    setUserInput("");
     setIsGenerating(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/study-plan2", {
+      const response = await fetch("http://127.0.0.1:5000/review-study-plan", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -48,41 +40,20 @@ const StudyPlanChat = () => {
         body: JSON.stringify({ message: newUserMessages }),
       });
 
-      if (!response.body) {
-        throw new Error("ReadableStream not supported in this browser.");
+      if (response.ok) {
+        const data = await response.json();
+        const botMessage = { role: "bot", content: data.feedback };
+        setMessages((prevMessages) => [...prevMessages, botMessage]);
+      } else {
+        console.error("Server error:", response.statusText);
+        const errorMessage = { role: "bot", content: "Sorry, something went wrong. Please try again later." };
+        setMessages((prevMessages) => [...prevMessages, errorMessage]);
       }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let partialData = "";
-
-      const readChunk = () => {
-        reader.read().then(({ done, value }) => {
-          if (done) {
-            console.log("Stream complete");
-            setIsGenerating(false);
-            // After the stream is done, set the final message content
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              { role: "bot", content: partialData },
-            ]);
-            return;
-          }
-
-          const chunk = decoder.decode(value, { stream: true });
-          partialData += chunk; // Accumulate chunk
-
-          // Continue reading
-          readChunk();
-        }).catch((error) => {
-          console.error("Error reading stream:", error);
-          setIsGenerating(false);
-        });
-      };
-
-      readChunk();
     } catch (error) {
       console.error("Error:", error);
+      const errorMessage = { role: "bot", content: "Unable to connect to the server. Please try again later." };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+    } finally {
       setIsGenerating(false);
     }
   };
@@ -90,7 +61,7 @@ const StudyPlanChat = () => {
   return (
     <Box
       sx={{
-        height: "100vh", 
+        height: "100vh",
         width: "100vw",
         display: "flex",
         flexDirection: "column",
@@ -107,19 +78,19 @@ const StudyPlanChat = () => {
           mb: 4,
         }}
       >
-        Study Plan Chat
+        Review Study Plan
       </Typography>
 
-      {/* Display messages */}
+      {/* Chat messages display */}
       <Box
         sx={{
-          flexGrow: 1, // This ensures the message box takes available space
-          overflowY: "auto", // Enable scrolling for the messages
+          flexGrow: 1,
+          overflowY: "auto",
           border: "1px solid #ccc",
           p: 2,
           mb: 2,
           display: "flex",
-          flexDirection: "column", // Messages will be stacked normally from top to bottom
+          flexDirection: "column",
         }}
       >
         {messages.map((message, index) => (
@@ -141,10 +112,9 @@ const StudyPlanChat = () => {
               }}
             >
               {message.role === "bot" ? (
-                // Use ReactMarkdown to render the bot's response as Markdown
                 <ReactMarkdown
                   children={message.content}
-                  remarkPlugins={[remarkGfm]} // Enables GitHub Flavored Markdown (e.g., tables, task lists)
+                  remarkPlugins={[remarkGfm]}
                   components={{
                     h1: ({ node, ...props }) => <Typography variant="h4" {...props} />,
                     h2: ({ node, ...props }) => <Typography variant="h5" {...props} sx={{ mt: 4, mb: 2 }} />,
@@ -155,8 +125,8 @@ const StudyPlanChat = () => {
                         <Typography variant="body1" component="span" {...props} />
                       </li>
                     ),
-                    strong: ({ node, ...props }) => <strong style={{ fontWeight: 'bold' }} {...props} />,
-                    em: ({ node, ...props }) => <em style={{ fontStyle: 'italic' }} {...props} />,
+                    strong: ({ node, ...props }) => <strong style={{ fontWeight: "bold" }} {...props} />,
+                    em: ({ node, ...props }) => <em style={{ fontStyle: "italic" }} {...props} />,
                   }}
                 />
               ) : (
@@ -178,7 +148,6 @@ const StudyPlanChat = () => {
             <LinearProgress sx={{ width: "100%" }} />
           </Box>
         )}
-        {/* Scroll to the bottom of the chat */}
         <div ref={messagesEndRef} />
       </Box>
 
@@ -232,4 +201,4 @@ const StudyPlanChat = () => {
   );
 };
 
-export default StudyPlanChat;
+export default ReviewStudyPlan;
