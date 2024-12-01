@@ -4,7 +4,9 @@ import json
 from flask_cors import CORS
 from config import system_message_review_plan, system_message_study_plan
 
+
 app = Flask(__name__)
+url =  "http://host.docker.internal:1234/v1/chat/completions"
 CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 
 @app.route("/")
@@ -30,7 +32,6 @@ def generate_study_plan_v2():
         "messages": messages,
         "stream": True 
     }
-    url = "http://localhost:1234/v1/chat/completions"
     try:
         response = requests.post(
             url,
@@ -88,7 +89,6 @@ def review_study_plan():
         "messages": messages,
         "stream": False
     }
-    url = "http://localhost:1234/v1/chat/completions"
     try:
         response = requests.post(
             url,
